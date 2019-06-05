@@ -8,22 +8,22 @@ import pygtrie
 
 
 CUBES = [
-    ["a", "a", "e", "e", "g", "n"],
-    ["a", "b", "b", "j", "o", "o"],
-    ["a", "c", "h", "o", "p", "s"],
-    ["a", "f", "f", "k", "p", "s"],
-    ["a", "o", "o", "t", "t", "w"],
-    ["c", "i", "m", "o", "t", "u"],
-    ["d", "e", "i", "l", "r", "x"],
-    ["d", "e", "l", "r", "v", "y"],
-    ["d", "i", "s", "t", "t", "y"],
-    ["e", "e", "g", "h", "n", "w"],
-    ["e", "e", "i", "n", "s", "u"],
-    ["e", "h", "r", "t", "v", "w"],
-    ["e", "i", "o", "s", "s", "t"],
-    ["e", "l", "r", "r", "t", "y"],
-    ["h", "i", "m", "n", "qu", "u"],
-    ["h", "l", "n", "n", "r", "z"],
+    ["A", "A", "E", "E", "G", "N"],
+    ["A", "B", "B", "J", "O", "O"],
+    ["A", "C", "H", "O", "P", "S"],
+    ["A", "F", "F", "K", "P", "S"],
+    ["A", "O", "O", "T", "T", "W"],
+    ["C", "I", "M", "O", "T", "U"],
+    ["D", "E", "I", "L", "R", "X"],
+    ["D", "E", "L", "R", "V", "Y"],
+    ["D", "I", "S", "T", "T", "Y"],
+    ["E", "E", "G", "H", "N", "W"],
+    ["E", "E", "I", "N", "S", "U"],
+    ["E", "H", "R", "T", "V", "W"],
+    ["E", "I", "O", "S", "S", "T"],
+    ["E", "L", "R", "R", "T", "Y"],
+    ["H", "I", "M", "N", "Qu", "U"],
+    ["H", "L", "N", "N", "R", "Z"],
 ]
 
 
@@ -33,6 +33,7 @@ DEFAULT_WORD_LIST_PATH = './sowpods.txt'
 def main():
     word_list = _read_word_list()
     grid = _scramble_grid()
+    _render_grid(grid)
 
 
 def _read_word_list(word_list_filepath: str = DEFAULT_WORD_LIST_PATH) -> pygtrie.Trie:
@@ -51,6 +52,17 @@ def _scramble_grid(cubes: List[List[str]] = CUBES) -> List[List[str]]:
     ]
 
 
+def _render_grid(grid: List[List[str]]) -> None:
+    row_separator = "\n---------------\n"
+    rows = ["|".join([_pad_cube(c) for c in row]) for row in grid]
+    print("\n" + row_separator.join(rows) + "\n")
+
+
+def _pad_cube(cube: str) -> str:
+    right_padded = cube.ljust(3 - len(cube))
+    return right_padded.rjust(len(right_padded) + 1)
+
+
 def _depth_first_search(grid: List[List[str]], word_list: pygtrie.Trie) -> List[str]:
     words_found = set()
     for i in range(len(grid)):
@@ -62,7 +74,7 @@ def _depth_first_search(grid: List[List[str]], word_list: pygtrie.Trie) -> List[
 def _dfs_visit(cube: Tuple[int, int], grid: List[List[str]], word_list: pygtrie.Trie, word: str,
                cubes_visited: Set[Tuple[int, int]]) -> Set[str]:
     i, j = cube
-    word += grid[i][j]
+    word += grid[i][j].tolower()
     if not word_list.has_node(word):
         return set()
     words_found = {word} if word_list.has_key(word) else set()
