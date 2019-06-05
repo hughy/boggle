@@ -2,18 +2,21 @@
 import tempfile
 import unittest
 
+import pygtrie
+
 import boggle
 
 
 class TestBoggle(unittest.TestCase):
 
     TEST_CUBES = list("0123456789ABCDEF")
-    TEST_WORD_LIST = {"TEST", "SET"}
+    TEST_WORDS = {"test", "set"}
+    TEST_WORD_LIST = pygtrie.Trie.fromkeys(TEST_WORDS, True)
     TEST_GRID = [
-        ["T", "-", "-", "-"],
-        ["-", "E", "-", "-"],
-        ["-", "-", "S", "-"],
-        ["-", "-", "-", "T"]
+        ["t", "-", "-", "-"],
+        ["-", "e", "-", "-"],
+        ["-", "-", "s", "-"],
+        ["-", "-", "-", "t"]
     ]
 
     def test_scramble_grid(self):
@@ -24,15 +27,15 @@ class TestBoggle(unittest.TestCase):
 
     def test_read_word_list(self):
         temp_word_list_file = tempfile.NamedTemporaryFile(mode="w+")
-        temp_word_list_file.write("\n".join(self.TEST_WORD_LIST))
+        temp_word_list_file.write("\n".join(self.TEST_WORDS))
         temp_word_list_file.flush()
         word_list = boggle._read_word_list(word_list_filepath=temp_word_list_file.name)
         self.assertEqual(self.TEST_WORD_LIST, word_list)
 
     def test_dfs_visit(self):
         words_found = boggle._dfs_visit((0, 0), self.TEST_GRID, self.TEST_WORD_LIST, "", set())
-        self.assertEqual({"TEST"}, words_found)
+        self.assertEqual({"test"}, words_found)
 
     def test_depth_first_search(self):
         words_found = boggle._depth_first_search(self.TEST_GRID, self.TEST_WORD_LIST)
-        self.assertEqual(self.TEST_WORD_LIST, words_found)
+        self.assertEqual(self.TEST_WORDS, words_found)
