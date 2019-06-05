@@ -35,7 +35,7 @@ def main():
     grid = _scramble_grid()
 
 
-def _read_word_list(word_list_filepath = DEFAULT_WORD_LIST_PATH) -> pygtrie.Trie:
+def _read_word_list(word_list_filepath: str = DEFAULT_WORD_LIST_PATH) -> pygtrie.Trie:
     word_list = pygtrie.Trie()
     with open(word_list_filepath, mode='r') as word_list_file:
         for word in word_list_file:
@@ -43,7 +43,7 @@ def _read_word_list(word_list_filepath = DEFAULT_WORD_LIST_PATH) -> pygtrie.Trie
     return word_list
 
 
-def _scramble_grid(cubes = CUBES) -> List[List[str]]:
+def _scramble_grid(cubes: List[List[str]] = CUBES) -> List[List[str]]:
     random.shuffle(cubes)
     return [
         [random.choice(cube) for cube in row]
@@ -51,7 +51,7 @@ def _scramble_grid(cubes = CUBES) -> List[List[str]]:
     ]
 
 
-def _depth_first_search(grid, word_list) -> List[str]:
+def _depth_first_search(grid: List[List[str]], word_list: pygtrie.Trie) -> List[str]:
     words_found = set()
     for i in range(len(grid)):
         for j in range(len(grid[i])):
@@ -59,22 +59,29 @@ def _depth_first_search(grid, word_list) -> List[str]:
     return words_found
 
 
-def _dfs_visit(cube, grid, word_list, word, cubes_visited) -> Set[str]:
+def _dfs_visit(cube: Tuple[int, int], grid: List[List[str]], word_list: pygtrie.Trie, word: str,
+               cubes_visited: Set[Tuple[int, int]]) -> Set[str]:
     i, j = cube
     word += grid[i][j]
     if not word_list.has_node(word):
         return set()
     words_found = {word} if word_list.has_key(word) else set()
     neighbors = _get_neighboring_cubes(cube, grid, cubes_visited)
-    neighboring_words = [_dfs_visit(n, grid, word_list, word, cubes_visited.union({cube})) for n in neighbors]
+    neighboring_words = [_dfs_visit(n, grid, word_list, word, cubes_visited.union({cube}))
+                         for n in neighbors]
     return reduce(lambda x, y: x.union(y), neighboring_words, words_found)
 
 
 def _get_neighboring_cubes(cube, grid, cubes_visited) -> List[Tuple[int, int]]:
     i, j = cube
-    neighbors = [(i - 1, j - 1), (i - 1, j), (i - 1, j + 1),
-                 (i, j - 1), (i, j + 1), (i + 1, j - 1),
-                 (i + 1, j), (i + 1, j + 1)]
+    neighbors = [(i - 1, j - 1),
+                 (i - 1, j),
+                 (i - 1, j + 1),
+                 (i, j - 1),
+                 (i, j + 1),
+                 (i + 1, j - 1),
+                 (i + 1, j),
+                 (i + 1, j + 1)]
     return [(x, y) for (x, y) in neighbors
             if (x >= 0 and y >= 0 and x < len(grid) and y < len(grid[0])
             and (x, y) not in cubes_visited)]
