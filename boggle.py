@@ -34,6 +34,9 @@ def main():
     word_list = _read_word_list()
     grid = _scramble_grid()
     _render_grid(grid)
+    words_found = list(_depth_first_search(grid, word_list))
+    words_found.sort(key=lambda w: (len(w), w[0]))
+    print("\n".join(words_found))
 
 
 def _read_word_list(word_list_filepath: str = DEFAULT_WORD_LIST_PATH) -> pygtrie.Trie:
@@ -74,7 +77,7 @@ def _depth_first_search(grid: List[List[str]], word_list: pygtrie.Trie) -> List[
 def _dfs_visit(cube: Tuple[int, int], grid: List[List[str]], word_list: pygtrie.Trie, word: str,
                cubes_visited: Set[Tuple[int, int]]) -> Set[str]:
     i, j = cube
-    word += grid[i][j].tolower()
+    word += grid[i][j].upper()
     if not word_list.has_node(word):
         return set()
     words_found = {word} if word_list.has_key(word) else set()

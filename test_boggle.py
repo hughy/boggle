@@ -10,13 +10,13 @@ import boggle
 class TestBoggle(unittest.TestCase):
 
     TEST_CUBES = list("0123456789ABCDEF")
-    TEST_WORDS = {"test", "set"}
+    TEST_WORDS = {"TEST", "SET"}
     TEST_WORD_LIST = pygtrie.Trie.fromkeys(TEST_WORDS, True)
     TEST_GRID = [
-        ["t", "-", "-", "-"],
-        ["-", "e", "-", "-"],
-        ["-", "-", "s", "-"],
-        ["-", "-", "-", "t"]
+        ["T", "-", "-", "-"],
+        ["-", "E", "-", "-"],
+        ["-", "-", "S", "-"],
+        ["-", "-", "-", "T"]
     ]
 
     def test_scramble_grid(self):
@@ -34,7 +34,7 @@ class TestBoggle(unittest.TestCase):
 
     def test_dfs_visit(self):
         words_found = boggle._dfs_visit((0, 0), self.TEST_GRID, self.TEST_WORD_LIST, "", set())
-        self.assertEqual({"test"}, words_found)
+        self.assertEqual({"TEST"}, words_found)
 
     def test_depth_first_search(self):
         words_found = boggle._depth_first_search(self.TEST_GRID, self.TEST_WORD_LIST)
