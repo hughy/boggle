@@ -2,7 +2,9 @@
 from functools import reduce
 from pathlib import Path
 import random
-from typing import List, Set, Tuple
+import _thread
+import threading
+from typing import Callable, Iterable, List, Set, Tuple, TypeVar
 
 import pygtrie
 
@@ -27,6 +29,7 @@ CUBES = [
 ]
 
 
+DEFAULT_TIME_LIMIT = 10
 DEFAULT_WORD_LIST_PATH = './sowpods.txt'
 
 
@@ -34,9 +37,10 @@ def main():
     word_list = _read_word_list()
     grid = _scramble_grid()
     _render_grid(grid)
-    words_found = list(_depth_first_search(grid, word_list))
-    words_found.sort(key=lambda w: (len(w), w[0]))
-    print("\n".join(words_found))
+    player_entries = _prompt_player()
+    grid_words = list(_depth_first_search(grid, word_list))
+    valid_entries, invalid_entries = _partition(player_entries, lambda e: e in grid_words)
+    print("\n".join(valid_entries))
 
 
 def _read_word_list(word_list_filepath: str = DEFAULT_WORD_LIST_PATH) -> pygtrie.Trie:
@@ -53,6 +57,21 @@ def _scramble_grid(cubes: List[List[str]] = CUBES) -> List[List[str]]:
         [random.choice(cube) for cube in row]
         for row in [cubes[i::4] for i in range(4)]
     ]
+
+
+def _prompt_player(time_limit: int = DEFAULT_TIME_LIMIT) -> List[str]:
+    print("Enter as many words as you can find in the next {} seconds".format(time_limit))
+    timer = threading.Timer(time_limit, _thread.interrupt_main)
+    player_entries = []
+    try:
+        timer.start()
+        while True:
+            player_entries.append(input().upper())
+    except KeyboardInterrupt:
+        pass
+    timer.cancel()
+    print("Time's up!")
+    return player_entries
 
 
 def _render_grid(grid: List[List[str]]) -> None:
@@ -80,7 +99,7 @@ def _dfs_visit(cube: Tuple[int, int], grid: List[List[str]], word_list: pygtrie.
     word += grid[i][j].upper()
     if not word_list.has_node(word):
         return set()
-    words_found = {word} if word_list.has_key(word) else set()
+    words_found = {word} if word_list.has_key(word) and len(word) > 2 else set()
     neighbors = _get_neighboring_cubes(cube, grid, cubes_visited)
     neighboring_words = [_dfs_visit(n, grid, word_list, word, cubes_visited.union({cube}))
                          for n in neighbors]
@@ -100,6 +119,16 @@ def _get_neighboring_cubes(cube, grid, cubes_visited) -> List[Tuple[int, int]]:
     return [(x, y) for (x, y) in neighbors
             if (x >= 0 and y >= 0 and x < len(grid) and y < len(grid[0])
             and (x, y) not in cubes_visited)]
+
+
+T = TypeVar("T")
+
+
+def _partition(iterable: Iterable[T], predicate: Callable[[T], bool]) -> Tuple[List[T], List[T]]:
+    a, b = [], []
+    for i in iterable:
+        (a if predicate(i) else b).append(i)
+    return a, b
 
 
 if __name__ == "__main__":

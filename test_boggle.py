@@ -39,3 +39,9 @@ class TestBoggle(unittest.TestCase):
     def test_depth_first_search(self):
         words_found = boggle._depth_first_search(self.TEST_GRID, self.TEST_WORD_LIST)
         self.assertEqual(self.TEST_WORDS, words_found)
+
+    def test_partition(self):
+        numbers = [1, 2, 3, 4, 5, 6, 7, 8]
+        evens, odds = boggle._partition(numbers, lambda x: x % 2 == 0)
+        self.assertEqual([2, 4, 6, 8], evens)
+        self.assertEqual([1, 3, 5, 7], odds)
