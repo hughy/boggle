@@ -4,9 +4,12 @@ from pathlib import Path
 import random
 import _thread
 import threading
+from time import sleep
 from typing import Callable, Iterable, List, Set, Tuple, TypeVar
+import sys
 
 import pygtrie
+import prompt_toolkit.output as pyout
 
 
 CUBES = [
@@ -34,12 +37,36 @@ DEFAULT_WORD_LIST_PATH = './sowpods.txt'
 
 
 def main():
+    print("Reading word list...")
     word_list = _read_word_list()
-    grid = _scramble_grid()
+    print("Scrambling grid...")
+    grid = _animated_scramble_grid()
     _render_grid(grid)
     player_entries = _prompt_player()
     possible_words = _depth_first_search(grid, word_list)
     _display_results(player_entries, possible_words)
+
+
+def _prompt_number_of_players() -> int:
+    print("How many players? (1 or 2)")
+    try:
+        players = int(input())
+        if players not in {1, 2}:
+            raise ValueError
+        return players
+    except ValueError:
+        return _prompt_number_of_players()
+    finally:
+        _clear_lines(2)
+
+
+def _animated_scramble_grid():
+    for _ in range(10):
+        grid = _scramble_grid()
+        _render_grid(grid)
+        sleep(0.2)
+        _clear_grid(grid)
+    return _scramble_grid()
 
 
 def _read_word_list(word_list_filepath: str = DEFAULT_WORD_LIST_PATH) -> pygtrie.Trie:
@@ -58,6 +85,18 @@ def _scramble_grid(cubes: List[List[str]] = CUBES) -> List[List[str]]:
     ]
 
 
+def _play(grid: List[List[int]], time_limit: int = DEFAULT_TIME_LIMIT) -> List[str]:
+    _conceal_grid(grid)
+    print("Ready?")
+    input()
+    _clear_lines(2)
+    _clear_grid(grid)
+    _render_grid(grid)
+    player_entries = _prompt_player(time_limit)
+    _clear_lines(len(player_entries) + 3)
+    return player_entries
+
+
 def _prompt_player(time_limit: int = DEFAULT_TIME_LIMIT) -> List[str]:
     print("Enter as many words as you can find in the next {} seconds".format(time_limit))
     timer = threading.Timer(time_limit, _thread.interrupt_main)
@@ -65,6 +104,7 @@ def _prompt_player(time_limit: int = DEFAULT_TIME_LIMIT) -> List[str]:
     try:
         timer.start()
         while True:
+            # Capitalize all inputs
             player_entries.append(input().upper())
     except KeyboardInterrupt:
         pass
@@ -76,12 +116,28 @@ def _prompt_player(time_limit: int = DEFAULT_TIME_LIMIT) -> List[str]:
 def _render_grid(grid: List[List[str]]) -> None:
     row_separator = "\n---------------\n"
     rows = ["|".join([_pad_cube(c) for c in row]) for row in grid]
-    print("\n" + row_separator.join(rows) + "\n")
+    print(row_separator.join(rows))
 
 
 def _pad_cube(cube: str) -> str:
     right_padded = cube.ljust(3 - len(cube))
     return right_padded.rjust(len(right_padded) + 1)
+
+
+def _conceal_grid(grid: List[List[str]]) -> None:
+    concealed_grid = [[chr(9608) for cube in row] for row in grid]
+    _render_grid(concealed_grid)
+
+
+def _clear_lines(n: int) -> None:
+    output = pyout.create_output(sys.stdout)
+    output.cursor_up(n)
+    output.erase_down()
+    output.flush()
+
+
+def _clear_grid(grid: List[List[int]]) -> None:
+    _clear_lines(2 * len(grid) - 1)
 
 
 def _depth_first_search(grid: List[List[str]], word_list: pygtrie.Trie) -> List[str]:
@@ -95,6 +151,7 @@ def _depth_first_search(grid: List[List[str]], word_list: pygtrie.Trie) -> List[
 def _dfs_visit(cube: Tuple[int, int], grid: List[List[str]], word_list: pygtrie.Trie, word: str,
                cubes_visited: Set[Tuple[int, int]]) -> Set[str]:
     i, j = cube
+    # Capitalize all words
     word += grid[i][j].upper()
     if not word_list.has_node(word):
         return set()
