@@ -29,7 +29,7 @@ CUBES = [
 ]
 
 
-DEFAULT_TIME_LIMIT = 10
+DEFAULT_TIME_LIMIT = 60
 DEFAULT_WORD_LIST_PATH = './sowpods.txt'
 
 
@@ -38,9 +38,8 @@ def main():
     grid = _scramble_grid()
     _render_grid(grid)
     player_entries = _prompt_player()
-    grid_words = list(_depth_first_search(grid, word_list))
-    valid_entries, invalid_entries = _partition(player_entries, lambda e: e in grid_words)
-    print("\n".join(valid_entries))
+    possible_words = _depth_first_search(grid, word_list)
+    _display_results(player_entries, possible_words)
 
 
 def _read_word_list(word_list_filepath: str = DEFAULT_WORD_LIST_PATH) -> pygtrie.Trie:
@@ -121,6 +120,14 @@ def _get_neighboring_cubes(cube, grid, cubes_visited) -> List[Tuple[int, int]]:
             and (x, y) not in cubes_visited)]
 
 
+def _display_results(player_entries: List[str], possible_words: Set[str]) -> None:
+    valid_entries, invalid_entries = _partition(player_entries, lambda e: e in possible_words)
+    result_join = _list_outer_join(valid_entries, list(possible_words))
+    result_table = ["{:16} {}".format(found or "", possible) for found, possible in result_join]
+    print("\n".join(result_table))
+    print("You found {} of {} possible words".format(len(valid_entries), len(possible_words)))
+
+
 T = TypeVar("T")
 
 
@@ -129,6 +136,26 @@ def _partition(iterable: Iterable[T], predicate: Callable[[T], bool]) -> Tuple[L
     for i in iterable:
         (a if predicate(i) else b).append(i)
     return a, b
+
+
+def _list_outer_join(left: List[T], right: List[T]) -> List[Tuple[T, T]]:
+    joined = []
+    ls = sorted(left)
+    rs = sorted(right)
+    l = ls.pop(0) if ls else None
+    r = rs.pop(0) if rs else None
+    while l or r:
+        if l == r or l is None or r is None:
+            joined.append((l, r))
+            l = ls.pop(0) if ls else None
+            r = rs.pop(0) if rs else None
+        elif l < r:
+            joined.append((l, None))
+            l = ls.pop(0) if ls else None
+        else:
+            joined.append((None, r))
+            r = rs.pop(0) if rs else None
+    return joined
 
 
 if __name__ == "__main__":

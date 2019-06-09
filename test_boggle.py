@@ -45,3 +45,12 @@ class TestBoggle(unittest.TestCase):
         evens, odds = boggle._partition(numbers, lambda x: x % 2 == 0)
         self.assertEqual([2, 4, 6, 8], evens)
         self.assertEqual([1, 3, 5, 7], odds)
+
+    def test_list_outer_join(self):
+        left = [1, 3, 5, 7]
+        right = [2, 4, 6, 7]
+        joined = [(1, None), (None, 2), (3, None), (None, 4), (5, None), (None, 6), (7, 7)]
+        self.assertEqual(joined, boggle._list_outer_join(left, right))
+        # Ensure that _list_outer_join does not modify input
+        self.assertEqual([1, 3, 5, 7], left)
+        self.assertEqual([2, 4, 6, 7], right)
