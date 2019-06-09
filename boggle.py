@@ -41,8 +41,7 @@ def main():
     word_list = _read_word_list()
     print("Scrambling grid...")
     grid = _animated_scramble_grid()
-    _render_grid(grid)
-    player_entries = _prompt_player()
+    player_entries = _play(grid)
     possible_words = _depth_first_search(grid, word_list)
     _display_results(player_entries, possible_words)
 
@@ -87,14 +86,12 @@ def _scramble_grid(cubes: List[List[str]] = CUBES) -> List[List[str]]:
 
 def _play(grid: List[List[int]], time_limit: int = DEFAULT_TIME_LIMIT) -> List[str]:
     _conceal_grid(grid)
-    print("Ready?")
+    print("You will have {} seconds to find as many words as you can. Ready?".format(time_limit))
     input()
     _clear_lines(2)
     _clear_grid(grid)
     _render_grid(grid)
-    player_entries = _prompt_player(time_limit)
-    _clear_lines(len(player_entries) + 3)
-    return player_entries
+    return _prompt_player(time_limit)
 
 
 def _prompt_player(time_limit: int = DEFAULT_TIME_LIMIT) -> List[str]:
@@ -106,6 +103,7 @@ def _prompt_player(time_limit: int = DEFAULT_TIME_LIMIT) -> List[str]:
         while True:
             # Capitalize all inputs
             player_entries.append(input().upper())
+            _clear_lines(1)
     except KeyboardInterrupt:
         pass
     timer.cancel()
