@@ -16,14 +16,16 @@ class TestBoggle(unittest.TestCase):
         ["T", "-", "-", "-"],
         ["-", "E", "-", "-"],
         ["-", "-", "S", "-"],
-        ["-", "-", "-", "T"]
+        ["-", "-", "-", "T"],
     ]
 
     def test_scramble_grid(self):
         grid = boggle._scramble_grid(self.TEST_CUBES)
         self.assertEqual(4, len(grid))
         self.assertTrue(all(len(row) == 4 for row in grid))
-        self.assertEqual(sorted(self.TEST_CUBES), sorted([cube for row in grid for cube in row]))
+        self.assertEqual(
+            sorted(self.TEST_CUBES), sorted([cube for row in grid for cube in row])
+        )
 
     def test_read_word_list(self):
         temp_word_list_file = tempfile.NamedTemporaryFile(mode="w+")
@@ -33,7 +35,9 @@ class TestBoggle(unittest.TestCase):
         self.assertEqual(self.TEST_WORD_LIST, word_list)
 
     def test_dfs_visit(self):
-        words_found = boggle._dfs_visit((0, 0), self.TEST_GRID, self.TEST_WORD_LIST, "", set())
+        words_found = boggle._dfs_visit(
+            (0, 0), self.TEST_GRID, self.TEST_WORD_LIST, "", set()
+        )
         self.assertEqual({"TEST"}, words_found)
 
     def test_depth_first_search(self):
@@ -49,7 +53,15 @@ class TestBoggle(unittest.TestCase):
     def test_list_outer_join(self):
         left = [1, 3, 5, 7]
         right = [2, 4, 6, 7]
-        joined = [(1, None), (None, 2), (3, None), (None, 4), (5, None), (None, 6), (7, 7)]
+        joined = [
+            (1, None),
+            (None, 2),
+            (3, None),
+            (None, 4),
+            (5, None),
+            (None, 6),
+            (7, 7),
+        ]
         self.assertEqual(joined, boggle._list_outer_join(left, right))
         # Ensure that _list_outer_join does not modify input
         self.assertEqual([1, 3, 5, 7], left)
