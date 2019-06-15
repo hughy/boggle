@@ -46,19 +46,6 @@ def main():
     _display_results(player_entries, possible_words)
 
 
-def _prompt_number_of_players() -> int:
-    print("How many players? (1 or 2)")
-    try:
-        players = int(input())
-        if players not in {1, 2}:
-            raise ValueError
-        return players
-    except ValueError:
-        return _prompt_number_of_players()
-    finally:
-        _clear_lines(2)
-
-
 def _animated_scramble_grid():
     for _ in range(10):
         grid = _scramble_grid()
