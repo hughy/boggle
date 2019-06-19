@@ -43,26 +43,3 @@ class TestBoggle(unittest.TestCase):
     def test_depth_first_search(self):
         words_found = boggle._depth_first_search(self.TEST_GRID, self.TEST_WORD_LIST)
         self.assertEqual(self.TEST_WORDS, words_found)
-
-    def test_partition(self):
-        numbers = [1, 2, 3, 4, 5, 6, 7, 8]
-        evens, odds = boggle._partition(numbers, lambda x: x % 2 == 0)
-        self.assertEqual([2, 4, 6, 8], evens)
-        self.assertEqual([1, 3, 5, 7], odds)
-
-    def test_list_outer_join(self):
-        left = [1, 3, 5, 7]
-        right = [2, 4, 6, 7]
-        joined = [
-            (1, None),
-            (None, 2),
-            (3, None),
-            (None, 4),
-            (5, None),
-            (None, 6),
-            (7, 7),
-        ]
-        self.assertEqual(joined, boggle._list_outer_join(left, right))
-        # Ensure that _list_outer_join does not modify input
-        self.assertEqual([1, 3, 5, 7], left)
-        self.assertEqual([2, 4, 6, 7], right)

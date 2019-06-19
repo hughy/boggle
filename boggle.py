@@ -5,11 +5,11 @@ import random
 import _thread
 import threading
 from time import sleep
-from typing import Callable, Iterable, List, Set, Tuple, TypeVar
-import sys
+from typing import List, Set, Tuple
 
 import pygtrie
-import prompt_toolkit.output as pyout
+
+import utils
 
 
 CUBES = [
@@ -33,7 +33,7 @@ CUBES = [
 
 
 DEFAULT_TIME_LIMIT = 60
-DEFAULT_WORD_LIST_PATH = "./sowpods.txt"
+DEFAULT_WORD_LIST_PATH = Path("sowpods.txt")
 
 
 def main():
@@ -78,7 +78,7 @@ def _play(grid: List[List[int]], time_limit: int = DEFAULT_TIME_LIMIT) -> List[s
         )
     )
     input()
-    _clear_lines(2)
+    utils.clear_lines(2)
     _clear_grid(grid)
     _render_grid(grid)
     return _prompt_player(time_limit)
@@ -95,7 +95,7 @@ def _prompt_player(time_limit: int = DEFAULT_TIME_LIMIT) -> List[str]:
         while True:
             # Capitalize all inputs
             player_entries.append(input().upper())
-            _clear_lines(1)
+            utils.clear_lines(1)
     except KeyboardInterrupt:
         pass
     timer.cancel()
@@ -119,15 +119,8 @@ def _conceal_grid(grid: List[List[str]]) -> None:
     _render_grid(concealed_grid)
 
 
-def _clear_lines(n: int) -> None:
-    output = pyout.create_output(sys.stdout)
-    output.cursor_up(n)
-    output.erase_down()
-    output.flush()
-
-
 def _clear_grid(grid: List[List[int]]) -> None:
-    _clear_lines(2 * len(grid) - 1)
+    utils.clear_lines(2 * len(grid) - 1)
 
 
 def _depth_first_search(grid: List[List[str]], word_list: pygtrie.Trie) -> List[str]:
@@ -187,10 +180,10 @@ def _get_neighboring_cubes(cube, grid, cubes_visited) -> List[Tuple[int, int]]:
 
 
 def _display_results(player_entries: List[str], possible_words: Set[str]) -> None:
-    valid_entries, invalid_entries = _partition(
+    valid_entries, invalid_entries = utils.partition(
         player_entries, lambda e: e in possible_words
     )
-    result_join = _list_outer_join(valid_entries, list(possible_words))
+    result_join = utils.list_outer_join(valid_entries, list(possible_words))
     result_table = [
         "{:16} {}".format(found or "", possible) for found, possible in result_join
     ]
@@ -200,38 +193,6 @@ def _display_results(player_entries: List[str], possible_words: Set[str]) -> Non
             len(valid_entries), len(possible_words)
         )
     )
-
-
-T = TypeVar("T")
-
-
-def _partition(
-    iterable: Iterable[T], predicate: Callable[[T], bool]
-) -> Tuple[List[T], List[T]]:
-    a, b = [], []
-    for i in iterable:
-        (a if predicate(i) else b).append(i)
-    return a, b
-
-
-def _list_outer_join(left: List[T], right: List[T]) -> List[Tuple[T, T]]:
-    joined = []
-    ls = sorted(left)
-    rs = sorted(right)
-    l = ls.pop(0) if ls else None
-    r = rs.pop(0) if rs else None
-    while l or r:
-        if l == r or l is None or r is None:
-            joined.append((l, r))
-            l = ls.pop(0) if ls else None
-            r = rs.pop(0) if rs else None
-        elif l < r:
-            joined.append((l, None))
-            l = ls.pop(0) if ls else None
-        else:
-            joined.append((None, r))
-            r = rs.pop(0) if rs else None
-    return joined
 
 
 if __name__ == "__main__":
