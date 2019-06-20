@@ -10,6 +10,15 @@ T = TypeVar("T")
 def partition(
     iterable: Iterable[T], predicate: Callable[[T], bool]
 ) -> Tuple[List[T], List[T]]:
+    """
+    Partition the input iterable according to some predicate.
+
+    :param Iterable[T] iterable:
+    :param Callable[[T], bool] predicate:
+    :return: a list of items from iterable for which predicate is true and a list of items for
+    which predicate is false
+    :rtype: Tuple[List[T], List[T]]
+    """
     a, b = [], []
     for i in iterable:
         (a if predicate(i) else b).append(i)
@@ -17,6 +26,12 @@ def partition(
 
 
 def list_outer_join(left: List[T], right: List[T]) -> List[Tuple[T, T]]:
+    """
+    :param List[T] left:
+    :param List[T] right:
+    :return: outer join of two input lists, left and right
+    :rtype: List[Tuple[T, T]]
+    """
     joined = []
     ls = sorted(left)
     rs = sorted(right)
@@ -37,6 +52,12 @@ def list_outer_join(left: List[T], right: List[T]) -> List[Tuple[T, T]]:
 
 
 def clear_lines(n: int) -> None:
+    """
+    Erase n previous lines from stdout.
+
+    :param int n: number of lines of output to clear
+    :return: None
+    """
     output = pyout.create_output(sys.stdout)
     output.cursor_up(n)
     output.erase_down()
